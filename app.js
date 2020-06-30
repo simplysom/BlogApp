@@ -45,6 +45,18 @@ app.get('/blogs/new',function(req,res){
     res.render('new');
 })
 
+app.get('/blogs/:id',function(req,res){
+    Blog.findById(req.params.id,function(err,foundBlog){
+        if(err){
+            res.redirect("/blogs");
+        }
+        else{
+            res.render("show",{blog:foundBlog})
+        }
+    })
+    res.send("This is the show page");
+})
+
 app.post('/blogs',function(req,res){
     var title=req.body.title;
     var image=req.body.image;

@@ -1,4 +1,14 @@
 <%- include('./partials/header.ejs') %>
-<%= blogs.title %>
 <h1>This is the index page</h1>
+<% blogs.forEach(function(blog){ %>
+    <div>
+        <h2><%= blog.title %></h2>
+        <img src="<%= blog.image %>">
+        <span><%= blog.created %></span>
+        <p><%= blog.body %></p>
+        <a href="/blogs/<%= blog._id %>">Read more</a>
+    </div>
+
+<%}) %>
+
 <%- include('./partials/footer.ejs') %>
