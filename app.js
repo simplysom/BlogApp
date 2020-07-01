@@ -1,7 +1,8 @@
 var express=require('express');
 var bodyParser=require('body-parser');
+var expressSanitizer=require('express-sanitizer');
 var mongoose=require('mongoose');
-
+var methodOverride=require('method-override');
 var app=express();
 mongoose.connect("mongodb+srv://som:som12345@cluster0.wmh8p.mongodb.net/<dbname>?retryWrites=true&w=majority",{useNewUrlParser:true});
 const db=mongoose.connection;
@@ -10,7 +11,9 @@ db.once('open',() => console.log("connected to mongoose!!"));
 
 app.set("view engine","ejs");
 app.use(express.static("public"));
-app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(expressSanitizer());
+app.use(methodOverride("_method"));
 //Mongoose model config
 var blogSchema=new mongoose.Schema({
     title:String,
@@ -44,7 +47,7 @@ app.get('/blogs',function(req,res){
 app.get('/blogs/new',function(req,res){
     res.render('new');
 })
-
+//Show route
 app.get('/blogs/:id',function(req,res){
     Blog.findById(req.params.id,function(err,foundBlog){
         if(err){
@@ -54,15 +57,38 @@ app.get('/blogs/:id',function(req,res){
             res.render("show",{blog:foundBlog})
         }
     })
-    res.send("This is the show page");
+})
+//edit route
+app.get('/blogs/:id/edit',function(req,res){
+    Blog.findById(req.params.id,function(err,foundBlog){
+        if(err){
+            res.redirect("/blogs");
+        }
+        else{
+            res.render("edit",{blog:foundBlog})
+        }
+    })
+})
+//update route
+app.put('/blogs/:id',function(req,res){
+    req.body.blog.body=expressSanitizer(req.body.blog.body);
+    Blog.findByIdAndUpdate(req.params.id,req.body.blog,function(err,updatedBlog){
+        if(err){
+            res.redirect("/blogs");
+        }
+        else{
+            res.redirect("/blogs/"+req.params.id);
+        }
+    })
 })
 
 app.post('/blogs',function(req,res){
-    var title=req.body.title;
+    /* var title=req.body.title;
     var image=req.body.image;
     var body=req.body.body;
-    var new_blog={title:title,image:image,body:body};
-    Blog.create(new_blog,function(err,newBlog){
+    var new_blog={title:title,image:image,body:body}; */
+    req.body.blog.body=expressSanitizer(req.body.blog.body);
+    Blog.create(req.body.blog,function(err,newBlog){
 
         if(err){
             res.render('new');
@@ -73,6 +99,17 @@ app.post('/blogs',function(req,res){
     })
 })
 
+//delete route
+app.delete('/blogs/:id',function(req,res){
+    Blog.findByIdAndDelete(req.params.id,function(err){
+        if(err){
+            res.redirect("/blogs");
+        }
+        else{
+            res.redirect("/blogs");
+        }
+    })
+})
 app.listen(3000,function(){
     console.log("Server is running");
 })
