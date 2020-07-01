@@ -71,7 +71,7 @@ app.get('/blogs/:id/edit',function(req,res){
 })
 //update route
 app.put('/blogs/:id',function(req,res){
-    req.body.blog.body=expressSanitizer(req.body.blog.body);
+    //req.body.blog.body=expressSanitizer(req.body.blog.body);
     Blog.findByIdAndUpdate(req.params.id,req.body.blog,function(err,updatedBlog){
         if(err){
             res.redirect("/blogs");
@@ -87,7 +87,7 @@ app.post('/blogs',function(req,res){
     var image=req.body.image;
     var body=req.body.body;
     var new_blog={title:title,image:image,body:body}; */
-    req.body.blog.body=expressSanitizer(req.body.blog.body);
+    //req.body.blog.body=expressSanitizer(req.body.blog.body);
     Blog.create(req.body.blog,function(err,newBlog){
 
         if(err){
